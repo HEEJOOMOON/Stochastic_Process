@@ -58,6 +58,7 @@ class Ornstein_Uhlenbeck:
         elif self.method == 'max_likelihood':
             None
 
+
     def predict(
             self,
             t: int,
@@ -75,12 +76,14 @@ class Ornstein_Uhlenbeck:
         self.confidence_interval_ = T.interval(cl, dof, loc=mean, scale=std)
         return S
 
+
     @staticmethod
     def simulation(mu, sigma, theta, n, dt):
         X = np.zeros(n)
         for i in range(1, n):
             X[i] = X[i-1] + theta*(mu - X[i-1])*dt + sigma*np.random.normal(loc=0.0, scale=1.0)
         return X
+
 
 if __name__ == '__main__':
     import FinanceDataReader as fdr

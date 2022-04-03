@@ -104,6 +104,7 @@ class Brownian:
         elif self.process == 'geometric':
             return self._gbm(S, t, confidence_level)
 
+
     @staticmethod
     def simulation(process: str,
                    mu: Optional[float],
