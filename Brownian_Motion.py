@@ -109,8 +109,8 @@ class Brownian:
     def simulation(process: str,
                    mu: Optional[float],
                    sigma,
-                   n,
-                   dt: float,
+                   n: int = 1000,
+                   dt: float = 1/252,
                    initial_value: Union[int, float] = 100,
                    ):
 

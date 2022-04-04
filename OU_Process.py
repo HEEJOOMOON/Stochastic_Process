@@ -3,7 +3,7 @@ import pandas as pd
 from typing import Union
 import statsmodels.api as sm
 from scipy.stats import t as T
-
+from typing import Optional, Union
 
 class Ornstein_Uhlenbeck:
 
@@ -78,7 +78,12 @@ class Ornstein_Uhlenbeck:
 
 
     @staticmethod
-    def simulation(mu, sigma, theta, n, dt):
+    def simulation(mu: Optional[float],
+                   sigma: Union[float, int],
+                   theta: Union[float, int],
+                   n: int = 1000,
+                   dt: float = 1/252,
+                   ):
         X = np.zeros(n)
         for i in range(1, n):
             X[i] = X[i-1] + theta*(mu - X[i-1])*dt + sigma*np.random.normal(loc=0.0, scale=1.0)
