@@ -5,16 +5,26 @@ from scipy.stats import t as T
 
 class Brownian:
 
-    def __init__(self, series: Union[pd.Series, np.array],
+    def __init__(self, series: Union[pd.DataFrame, pd.Series, np.array],
                  process: str,
                  period: Union[str, int, float],
                  ):
+        '''
+
+        :param series:
+            - (pd.DataFrame): row=t, column=n
+            - (np.array) :
+        :param process:
+        :param period:
+        '''
 
         if type(series) == pd.Series:
             self.time_series = np.array(series)
+        elif type(pd.DataFrame) == pd.DataFrame:
+            self.time_series = np.array(series.T)
         elif type(series) == np.array:
             self.time_series = series
-        else: raise TypeError('pd.Series or np.array')
+        else: raise TypeError('pd.Series, np.array or pd.DataFrame')
 
         self.process = process
         self.mu, self.std = None, None
@@ -35,6 +45,9 @@ class Brownian:
         else:
             raise KeyError('daily, monthly, year, int or float')
 
+        if self.time_series.shape[0] > 1:
+            self.multi = True
+            self.corr = None
 
     def fit(self):
 
