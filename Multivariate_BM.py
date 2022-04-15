@@ -19,7 +19,9 @@ class Brownian:
         '''
 
         if type(pd.DataFrame) == pd.DataFrame:
-            self.time_series = np.array(series.T)
+            self.time_series = np.array(series)
+            self.col_names = series.columns
+            self.end_date = series.index[-1]
         elif type(series) == np.array:
             self.time_series = series
         else: raise TypeError('pd.Series, np.array or pd.DataFrame')
@@ -27,7 +29,6 @@ class Brownian:
         self.process = process
         self.mu, self.cov = None, None
         self.t, self.i = None, None
-        self.confidence_level_ = None
         self.corr = None
 
         if type(period) == str:
@@ -49,54 +50,49 @@ class Brownian:
 
         if self.process == 'standard':
             tmp = np.diff(self.time_series)
-            self.cov = np.cov(tmp)/np.sqrt(self.dt)
+            self.cov = np.cov(tmp.T)/np.sqrt(self.dt)
 
         elif self.process == 'arithmetic':
             tmp = np.diff(self.time_series)
-            self.mu = np.mean(tmp, axis=1)/self.dt
-            self.cov = np.cov(tmp)/np.sqrt(self.dt)
+            self.mu = np.mean(tmp, axis=0)/self.dt
+            self.cov = np.cov(tmp.T)/np.sqrt(self.dt)
 
         elif self.process == 'geometric':
             tmp = np.diff(np.log(self.time_series))
-            self.mu = lambda dt: np.mean(tmp, axis=1)/self.dt * dt
-            self.cov = lambda dt: np.cov(tmp)/np.sqrt(self.dt) * dt
+            self.mu = lambda dt: np.mean(tmp, axis=0)/self.dt * dt
+            self.cov = lambda dt: np.cov(tmp.T)/np.sqrt(self.dt) * dt
 
         else:
             raise KeyError('standard, arithmetic or geometric')
 
 
-    def _standard(self, S, t, cl):
+    def _standard(self, S, t):
 
-        path = S[0] + np.sqrt(t)*self.dt*np.random.normal(loc=0.0, scale=1.0, size=len(S))
-        mean = np.mean(path)
-        std = np.std(path)
-        dof = len(S)-1
-        self.confidence_level_ = T.interval(cl, dof, loc=mean, scale=std)
+        C = np.linalg.cholesky(self.cov)
+        path = S[0] + np.sqrt(t)*self.dt*np.matmul(C.T, np.random.normal(loc=0.0, scale=1.0, size=(S.shape[1], len(S))))
+
         return path
 
 
-    def _abm(self, S, t, cl):
+    def _abm(self, S, t):
 
-        path = S[0] + self.mu*t*self.dt + np.sqrt(self.std**2) * np.sqrt(t*self.dt)*np.random.normal(loc=0.0, scale=1.0, size=len(S))
-        mean = np.mean(path)
-        std = np.std(path)
-        dof = len(S)-1
-        self.confidence_level_ = T.interval(cl, dof, loc=mean, scale=std)
+        C = np.linalg.cholesky(self.cov)
+        path = S[0] + self.mu*t*self.dt + np.sqrt(self.cov) * np.sqrt(t*self.dt)*np.matmul(C.T, np.random.normal(loc=0.0, scale=1.0, size=(S.shape[1], len(S))))
+
         return path
 
 
-    def _gbm(self, S, t, cl):
+    def _gbm(self, S, t):
 
-        path = S[0] * np.exp(self.mu(t * self.dt) + self.std(t * self.dt) * np.random.normal(loc=0.0, scale=1.0, size=len(S)))
-        mean = np.mean(np.log(path))
-        std = np.std(np.log(path))
-        dof = len(S)-1
-        self.confidence_level_ = np.exp(T.interval(cl, dof, loc=mean, scale=std))
+        C = np.linalg.cholesky(self.cov)
+        path = S[0] * np.exp(self.mu(t * self.dt) + self.std(t * self.dt) * np.matmul(C.T, np.random.normal(loc=0.0, scale=1.0, size=(S.shape[1], len(S)))))
+
         return path
 
 
-    def predict(self, t: int, i: int=10000,
-                confidence_level: float=.95,
+    def predict(self,
+                t: int,
+                i: int=10000,
                 ):
 
         self.t = t
@@ -106,13 +102,13 @@ class Brownian:
         S[0] = self.time_series[-1]
 
         if self.process == 'standard':
-            return self._standard(S, t, confidence_level)
+            return self._standard(S, t)
 
         elif self.process == 'arithmetic':
-            return self._abm(S, t, confidence_level)
+            return self._abm(S, t)
 
         elif self.process == 'geometric':
-            return self._gbm(S, t, confidence_level)
+            return self._gbm(S, t)
 
 
     @staticmethod

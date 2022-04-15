@@ -21,7 +21,7 @@ class Brownian:
         if type(series) == pd.Series:
             self.time_series = np.array(series)
         elif type(pd.DataFrame) == pd.DataFrame:
-            self.time_series = np.array(series.T)
+            self.time_series = np.array(series)
         elif type(series) == np.array:
             self.time_series = series
         else: raise TypeError('pd.Series, np.array or pd.DataFrame')
