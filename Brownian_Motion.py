@@ -45,9 +45,6 @@ class Brownian:
         else:
             raise KeyError('daily, monthly, year, int or float')
 
-        if self.time_series.shape[0] > 1:
-            self.multi = True
-            self.corr = None
 
     def fit(self):
 
