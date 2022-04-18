@@ -139,19 +139,4 @@ class Brownian:
 
 
 if __name__ == '__main__':
-    import FinanceDataReader as fdr
-    import matplotlib.pyplot as plt
-
-    df = fdr.DataReader('KO', '2017-01-01', '2022-01-01').Close
-    model = Brownian(df, process='geometric', period='daily')
-    model.fit()
-    paths = []
-    for i in range(20):
-        paths.append(model.predict(t=i))
-    paths = np.array(paths)
-    plt.plot(paths[:, :20])
-    plt.show()
-    prediction = model.predict(t=20)
-    plt.hist(prediction)
-    plt.show()
-    print(model.confidence_level_)
+    None
