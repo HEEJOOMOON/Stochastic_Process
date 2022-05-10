@@ -81,11 +81,14 @@ class Ornstein_Uhlenbeck:
     def simulation(mu: Optional[float],
                    sigma: Union[float, int],
                    theta: Union[float, int],
+                   initial: Optional[float],
                    n: int = 1000,
                    T: int = 1000,
                    dt: float = 1/252,
                    ):
         X = np.zeros((T, n))
+        if initial:
+            X[0] = initial
         for i in range(1, T):
             X[i] = X[i-1] + theta*(mu - X[i-1])*dt + sigma*np.random.normal(loc=0.0, scale=1.0, size=n)
         return X
