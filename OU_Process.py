@@ -82,11 +82,12 @@ class Ornstein_Uhlenbeck:
                    sigma: Union[float, int],
                    theta: Union[float, int],
                    n: int = 1000,
+                   T: int = 1000,
                    dt: float = 1/252,
                    ):
-        X = np.zeros(n)
-        for i in range(1, n):
-            X[i] = X[i-1] + theta*(mu - X[i-1])*dt + sigma*np.random.normal(loc=0.0, scale=1.0)
+        X = np.zeros((T, n))
+        for i in range(1, T):
+            X[i] = X[i-1] + theta*(mu - X[i-1])*dt + sigma*np.random.normal(loc=0.0, scale=1.0, size=n)
         return X
 
 
